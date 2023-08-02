@@ -1,118 +1,138 @@
 import java.util.Scanner;
 
-public class TicTacToeGame {
-    private static final char PLAYER_X = 'X';
-    private static final char PLAYER_O = 'O';
-    private static final char EMPTY_BOX = ' ';
-    private static final int BOARD_SIZE = 9;
+public class App {
 
     public static void main(String[] args) {
+        runGame();
+    }
+
+    private static void runGame() {
         Scanner scan = new Scanner(System.in);
-        boolean gameOver = false;
+        char[] box = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        boolean boxEmpty = false;
+        byte winner = 0;
 
-        while (!gameOver) {
-            char[] board = new char[BOARD_SIZE];
-            initBoard(board);
+        System.out.println("Enter box number to select. Enjoy!\n");
 
-            System.out.println("Enter the box number to select. Enjoy!\n");
+        while (true) {
+            printBoard(box);
 
-            boolean playerTurn = true;
+            if (!boxEmpty) {
+                initializeBoard(box);
+                boxEmpty = true;
+            }
 
-            while (true) {
-                printBoard(board);
-                if (playerTurn) {
-                    int playerMove = getPlayerMove(scan, board);
-                    makeMove(board, playerMove, PLAYER_X);
-                    if (checkWinner(board, PLAYER_X)) {
-                        printBoard(board);
-                        System.out.println("You won the game!\n");
-                        break;
-                    } else if (isBoardFull(board)) {
-                        printBoard(board);
-                        System.out.println("It's a draw!\n");
-                        break;
-                    }
+            winner = playerTurn(scan, box);
+            if (winner == 0) {
+                winner = computerTurn(box);
+            }
+
+            if (winner != 0) {
+                printResult(winner);
+                break;
+            }
+        }
+        scan.close();
+    }
+
+    private static void printBoard(char[] box) {
+        System.out.println("\n\n " + box[0] + " | " + box[1] + " | " + box[2] + " ");
+        System.out.println("-----------");
+        System.out.println(" " + box[3] + " | " + box[4] + " | " + box[5] + " ");
+        System.out.println("-----------");
+        System.out.println(" " + box[6] + " | " + box[7] + " | " + box[8] + " \n");
+    }
+
+    private static void initializeBoard(char[] box) {
+        for (int i = 0; i < 9; i++)
+            box[i] = ' ';
+    }
+
+    private static void printResult(byte winner) {
+        if (winner == 1) {
+            System.out.println("You won the game!");
+        } else if (winner == 2) {
+            System.out.println("You lost the game!");
+        } else if (winner == 3) {
+            System.out.println("It's a draw!");
+        }
+        System.out.println("Created by Poliashenko Dmitry. Thanks for playing!");
+    }
+
+    private static byte playerTurn(Scanner scan, char[] box) {
+        byte input;
+        while (true) {
+            input = scan.nextByte();
+            if (input > 0 && input < 10) {
+                if (box[input - 1] == 'X' || box[input - 1] == 'O') {
+                    System.out.println("That one is already in use. Enter another.");
                 } else {
-                    int computerMove = getComputerMove(board);
-                    makeMove(board, computerMove, PLAYER_O);
-                    if (checkWinner(board, PLAYER_O)) {
-                        printBoard(board);
-                        System.out.println("You lost the game!\n");
-                        break;
-                    }
+                    box[input - 1] = 'X';
+                    return checkWinner(box);
                 }
-
-                playerTurn = !playerTurn;
-            }
-
-            System.out.print("Do you want to play again? (yes/no): ");
-            String playAgain = scan.next();
-            gameOver = !playAgain.equalsIgnoreCase("yes");
-        }
-
-        System.out.println("Thanks for playing!");
-    }
-
-    private static void initBoard(char[] board) {
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            board[i] = (char) (i + '1');
-        }
-    }
-
-    private static void printBoard(char[] board) {
-        System.out.println("\n " + board[0] + " | " + board[1] + " | " + board[2] + " ");
-        System.out.println("-----------");
-        System.out.println(" " + board[3] + " | " + board[4] + " | " + board[5] + " ");
-        System.out.println("-----------");
-        System.out.println(" " + board[6] + " | " + board[7] + " | " + board[8] + " \n");
-    }
-
-    private static int getPlayerMove(Scanner scan, char[] board) {
-        int move;
-        while (true) {
-            System.out.print("Enter your move (1-9): ");
-            move = scan.nextInt();
-            if (move >= 1 && move <= BOARD_SIZE && board[move - 1] == EMPTY_BOX) {
-                break;
             } else {
-                System.out.println("Invalid input or the box is already taken. Try again.");
+                System.out.println("Invalid input. Enter again.");
             }
         }
-        return move;
     }
 
-    private static boolean checkWinner(char[] board, char player) {
-        return (board[0] == player && board[1] == player && board[2] == player) ||
-                (board[3] == player && board[4] == player && board[5] == player) ||
-                (board[6] == player && board[7] == player && board[8] == player) ||
-                (board[0] == player && board[3] == player && board[6] == player) ||
-                (board[1] == player && board[4] == player && board[7] == player) ||
-                (board[2] == player && board[5] == player && board[8] == player) ||
-                (board[0] == player && board[4] == player && board[8] == player) ||
-                (board[2] == player && board[4] == player && board[6] == player);
-    }
+    private static byte checkWinner(char[] box) {
+        // Можливі способи перемоги для X та O
+        char[][] winConditions = {
+                {box[0], box[1], box[2]}, // Перша горизонталь
+                {box[3], box[4], box[5]}, // Друга горизонталь
+                {box[6], box[7], box[8]}, // Третя горизонталь
+                {box[0], box[3], box[6]}, // Перший вертикаль
+                {box[1], box[4], box[7]}, // Другий вертикаль
+                {box[2], box[5], box[8]}, // Третій вертикаль
+                {box[0], box[4], box[8]}, // Перша діагональ
+                {box[2], box[4], box[6]}  // Друга діагональ
+        };
 
-    private static boolean isBoardFull(char[] board) {
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            if (board[i] == EMPTY_BOX) {
-                return false;
+        for (char[] condition : winConditions) {
+            if (condition[0] == 'X' && condition[1] == 'X' && condition[2] == 'X') {
+                return 1; // Виграв гравець X
+            } else if (condition[0] == 'O' && condition[1] == 'O' && condition[2] == 'O') {
+                return 2; // Виграв гравець O
             }
         }
-        return true;
-    }
 
-    private static int getComputerMove(char[] board) {
-        int move;
-        while (true) {
-            move = (int) (Math.random() * BOARD_SIZE) + 1;
-            if (board[move - 1] == EMPTY_BOX) {
+        // Перевірка на нічию
+        boolean boxAvailable = false;
+        for (int i = 0; i < 9; i++) {
+            if (box[i] != 'X' && box[i] != 'O') {
+                boxAvailable = true;
                 break;
             }
         }
-        return move;
+
+        if (!boxAvailable) {
+            return 3; // Нічия
+        }
+
+        return 0; // Гра ще триває
     }
 
-    private static void makeMove(char[] board, int move, char player) {
-        board[move - 1] = player;
+    private static byte computerTurn(char[] box) {
+        byte rand;
+        boolean boxAvailable = false;
+        for (int i = 0; i < 9; i++) {
+            if (box[i] != 'X' && box[i] != 'O') {
+                boxAvailable = true;
+                break;
+            }
+        }
+
+        if (!boxAvailable) {
+            return 3;
+        }
+
+        while (true) {
+            rand = (byte) (Math.random() * (9 - 1 + 1) + 1);
+            if (box[rand - 1] != 'X' && box[rand - 1] != 'O') {
+                box[rand - 1] = 'O';
+                return checkWinner(box);
+            }
+        }
     }
 }
