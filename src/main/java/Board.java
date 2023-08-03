@@ -1,12 +1,8 @@
 import java.util.Scanner;
 
-public class App {
+public class Board {
 
-    public static void main(String[] args) {
-        runGame();
-    }
-
-    private static void runGame() {
+    static void runGame() {
         Scanner scan = new Scanner(System.in);
         char[] box = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
         boolean boxEmpty = false;
